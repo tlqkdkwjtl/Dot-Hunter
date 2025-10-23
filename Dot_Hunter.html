@@ -15,17 +15,72 @@
 
       <button id="startButton" onclick="startGame()">🎮 게임 시작</button>
     </div>
+    
+    <div id="tutorialOverlay" class="tutorial-overlay">
+      <div class="tutorial-content">
+        <h2>🎮 게임 진행 방법</h2>
+        <div class="tutorial-text">
+          <p><strong>🎯 목표:</strong> 소행성을 피하고 연료를 수집하세요!</p>
+          <p><strong>🎮 조작법:</strong></p>
+          <ul>
+            <li>방향키 또는 WASD로 우주선 이동</li>
+            <li>마우스 클릭으로 소행성 격추 (100점)</li>
+            <li>소행성이 빨간 선을 통과하면 점수 획득 (10점)</li>
+          </ul>
+          <p><strong>⚡ 연료:</strong> 초록색 네모를 수집하면 부스트!</p>
+          <p><strong>❤️ 생명:</strong> 소행성에 부딪히면 생명 감소</p>
+        </div>
+        <button id="tutorialClose" onclick="closeTutorial()">시작하기</button>
+      </div>
+    </div>
     <canvas id="gameBorder" width="500" height="10"></canvas>
     <canvas id="gameInfo" width="500" height="70"></canvas>
+
   </div>
   
   <div class="score-container">
     점수: <span id="score">0</span>
   </div>
 
-  <div class="controls">
-    <button onclick="increaseSpeed()">⚡ 빠르게</button>
-    <button onclick="decreaseSpeed()">🐌 느리게</button>
+  <div class="game-settings">
+    <div class="settings-letter">
+      <div class="letter-header">
+        <h3>📋 게임 설정</h3>
+        <div class="letter-fold"></div>
+      </div>
+      <div class="letter-content">
+        <div class="story-section">
+          <h4>🌌 Dot Hunter </h4>
+          <p>가깝고도 먼 미래 인류가 우주에 진출하고 우주선을 통한 은하 도약기술이 일반화 된 시대, 자동적으로 운석 파편을 막는 기술이 있었으나 은하 대전쟁으로 적용된 우주선은 전투용으로 차출되었으며, 충돌로 인해 은하간의 경계의 운석 지대에는 많은 운석과 소행성 파편이 생겨났다.</p>
+          <p>그로인해 우주선이나 화물이 손상되는 경우가 발생하였고 사람들은 것을 <strong>Dot</strong>라고 불렀으며, 이에 전문적으로 Dot를 줄이는 사람들을 자연스럽게 <strong>Dot Hunter</strong>라고 불렀다.</p>
+          <p><strong>신입 Dot Hunter! 너의 임무는 소행성을 피해 화물을 운송하는 것이다.</strong></p>
+          <p><strong>하지만, 소행을 파괴 할경수도 있으나 소행성 파편으로 우주선이 손상될 수 있다.</strong></p>
+          <p><strong>임무를 위해 최선을 다해 운송하도록</strong></p>
+        </div>
+        
+        <div class="setting-item">
+          <span>⚡ 속도 조절</span>
+          <div class="setting-buttons">
+            <button onclick="increaseSpeed()">빠르게</button>
+            <button onclick="decreaseSpeed()">느리게</button>
+          </div>
+        </div>
+        <div class="setting-item">
+          <span>🎮 조작법</span>
+          <div class="setting-info">
+            <p>방향키 또는 WASD</p>
+            <p>마우스 클릭으로 격추</p>
+          </div>
+        </div>
+        <div class="setting-item">
+          <span>🎯 목표</span>
+          <div class="setting-info">
+            <p>소행성 피하기</p>
+            <p>연료 수집하기</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="js/game03.js"></script>
