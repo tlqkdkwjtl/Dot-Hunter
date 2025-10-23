@@ -18,21 +18,17 @@ let spaceship = {
     y: 350, // 화면 하단
     width: 40,
     height: 30,
-    speed: 8
+    speed: 5
 };
 
 let score = 0; // 점수 변수 생성
 let lives = 3; // 생명 변수 생성
 let gameRunning = false; // 게임 실행 상태
 let gameLoop; // 게임 루프 변수
-let backgroundOffset = 0; // 배경 스크롤 오프셋
-let stars = []; // 별 배열
 let fuel = []; // 연료 배열
 let fuelBoost = false; // 연료 부스트 상태
 let fuelBoostTime = 0; // 연료 부스트 남은 시간
 let lastFuelSpawn = 0; // 마지막 연료 생성 시간
-let starSpawnCounter = 0; // 별 생성 카운터 (분산 처리용)
-let starSpawnInterval = 0; // 별 생성 간격 (30~50프레임)
 
 // 랜덤 색상 함수 생성 (소행성용 회색 계열)
 function getRandomColor(){
@@ -88,14 +84,12 @@ function drawFuel() {
             continue;
         }
         
-        // 연료 그리기 (작은 초록색 원)
-        ctx.beginPath();
-        ctx.arc(fuelItem.x, fuelItem.y, fuelItem.size, 0, Math.PI * 2);
+        // 연료 그리기 (작은 초록색 네모)
         ctx.fillStyle = "#00FF00";
-        ctx.fill();
+        ctx.fillRect(fuelItem.x - fuelItem.size, fuelItem.y - fuelItem.size, fuelItem.size * 2, fuelItem.size * 2);
         ctx.strokeStyle = "#00CC00";
         ctx.lineWidth = 1;
-        ctx.stroke();
+        ctx.strokeRect(fuelItem.x - fuelItem.size, fuelItem.y - fuelItem.size, fuelItem.size * 2, fuelItem.size * 2);
     }
     
     // 새로운 연료 생성 (10초에 한번 10% 확률)
@@ -179,11 +173,18 @@ function drawGameInfo() {
 // 게임 시작 함수
 function startGame() {
     if (!gameRunning) {
-        gameRunning = true;
         // 시작 오버레이 숨기기
         document.getElementById("startOverlay").style.display = "none";
-        gameLoop = requestAnimationFrame(updateGame);
+        // 튜토리얼 오버레이 보이기
+        document.getElementById("tutorialOverlay").style.display = "flex";
     }
+}
+
+// 튜토리얼 닫기 함수
+function closeTutorial() {
+    document.getElementById("tutorialOverlay").style.display = "none";
+    gameRunning = true;
+    gameLoop = requestAnimationFrame(updateGame);
 }
 
 // 게임 업데이트 함수 생성
@@ -194,48 +195,7 @@ function updateGame(){
     ctx.fillStyle = "#000022";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 별들 그리기 (최적화)
-    if (stars.length > 0) {
-        ctx.fillStyle = "#FFFFFF";
-        for (let i = stars.length - 1; i >= 0; i--) {
-            const star = stars[i];
-            star.y += 1; // 별이 뒤로 스크롤 (우주선이 앞으로 가는 효과)
-            
-            // 화면 아래로 사라진 별 제거
-            if (star.y > canvas.height + 50) {
-                stars.splice(i, 1);
-                continue;
-            }
-            
-            // 별 그리기 (조건부)
-            if (star.y > -10 && star.y < canvas.height + 10) { // 화면에 보이는 별만 그리기
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    }
     
-    // 새로운 별 생성 (60프레임 간격으로 더 분산 처리)
-    starSpawnCounter++;
-    const maxStars = fuelBoost ? 15 : 3; // 연료 부스트 시 15개, 일반 시 3개로 더 줄임
-    
-    // 별 생성 간격이 설정되지 않았거나 시간이 되었을 때
-    if (starSpawnInterval === 0 || starSpawnCounter >= starSpawnInterval) {
-        if (stars.length < maxStars) {
-            const starChance = fuelBoost ? 0.2 : 0.05; // 연료 부스트 시 20%, 일반 시 5%로 더 줄임
-            if (Math.random() < starChance) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: -50, // 화면 위에서 시작
-                    size: Math.random() * 1.5 + 0.5
-                });
-                // 다음 별 생성 간격 설정 (60~80프레임으로 더 길게)
-                starSpawnInterval = Math.floor(Math.random() * 21) + 60; // 60~80프레임
-                starSpawnCounter = 0; // 카운터 리셋
-            }
-        }
-    }
     
     // 연료 부스트 시간 감소
     if (fuelBoostTime > 0) {
@@ -247,7 +207,6 @@ function updateGame(){
     
     // 우주선이 앞으로 전진하는 효과 (연료 부스트에 따라 속도 조절)
     const speedMultiplier = fuelBoost ? 0.3 : 1; // 연료 부스트 시 30% 느리게
-    backgroundOffset += 1 * speedMultiplier;
 
     // 연료 그리기 및 업데이트
     drawFuel();
@@ -264,8 +223,6 @@ function updateGame(){
     // 소행성이 화면 아래로 떨어지면 피한 것으로 점수 10점
     if (circle.y - circle.r > canvas.height) {
         score += 10;  // 피한 것으로 10점
-        // 전진 효과 강화 (별 스크롤 속도 증가)
-        backgroundOffset += 10;
         resetAsteroid();
     }
     
@@ -323,8 +280,6 @@ canvas.addEventListener("click", function (e) {
 
     if (distance < circle.r){   // 성공적으로 소행성을 격추했을 경우
         score += 100;  // 격추로 100점
-        // 격추 시 더 강한 전진 효과 (별 스크롤 속도 대폭 증가)
-        backgroundOffset += 25;
         resetAsteroid();
     }
 });
